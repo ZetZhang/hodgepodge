@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 1.0.0)
+project(logging)
+set(CMAKE_BUILD_TYPE "Debug")
+add_compile_options(-std=c++14)
+set(CMAKE_CXX_FLAGS "-g -Wall")
+
+#set(FLAG $ENV{_TERROR_SWITCH})
+#if (FLAG)
+#add_definitions(-D_TMSG)
+#add_definitions(-D_TFATAL)
+#add_definitions(-D_TEXIT1)
+#add_definitions(-D_TEXIT2)
+#add_definitions(-D_TEXIT3)
+#add_definitions(-D_TUSAGE)
+
+file(GLOB SOURCES "*.cpp")
+add_executable(tests ${SOURCES})
