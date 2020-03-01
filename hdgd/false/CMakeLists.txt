@@ -1,7 +1,0 @@
-cmake_minimum_required(VERSION 1.0.0)
-project(false)
-set(CMAKE_BUILD_TYPE "Debug")
-add_compile_options(-std=c++14)
-set(CMAKE_CXX_FLAGS "-g -Wall")
-file(GLOB SOURCES "*.cpp")
-add_executable(tests ${SOURCES})
