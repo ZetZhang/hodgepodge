@@ -3,6 +3,7 @@
 #include <cstring>
 #include <utility>
 #include <cstdarg>
+#include <sstream>
 
 class T
 {
@@ -58,6 +59,90 @@ void list(const char *format, ...) {
     va_end(argList);
 }
 
+template<typename T>
+class f
+{
+public:
+    virtual void what() = 0;
+    //virtual std::ostream& operator<<(std::ostream &os, const T&) = 0;
+    virtual ~f() { std::cout << "f destructor" << std::endl; }
+};
+
+class ffff
+{
+public:
+    virtual ~ffff() { std::cout << "ffff destrcutor" << std::endl; }
+};
+
+class ff : public f<ff>, public ffff
+{
+public:
+    ff() : _value("what the fuck") {}
+    void what()  {
+        std::cout << "f: -> :ff" << std::endl;
+    }
+    friend std::ostream& operator<<(std::ostream &os, const ff &x) {
+        os << x._value;
+        return os;
+    }
+    std::string _value;
+    ~ff() { std::cout << "ff destructor" << std::endl; }
+};
+
+//template<typename T>
+//class fff : public f<T>
+//{
+//public:
+    //void what() {
+        //std::cout << "fff" << std::endl;
+    //}
+//};
+
+class A
+{
+public:
+    // 多继承，必须有一个是虚继承，否则将无法
+    virtual void At() = 0;
+    //virtual ~A() { std::cout << "A" << std::endl; }
+    virtual ~A() = default;
+};
+
+class AA
+{
+public:
+    virtual void AAt() = 0;
+    ~AA() { std::cout << "AA" << std::endl; }
+};
+
+template<typename T>
+class need
+{
+public:
+    template<typename o>
+    friend std::ostream& operator<<(std::ostream &os, const need<o>&);
+private:
+};
+
+template<typename T>
+std::ostream& operator<<(std::ostream &os, const need<T>&x) {
+    // friend class `ToString`
+    os << "\" " << T::toString() << " \"";
+    //os << "\" " << ToString(x) << " \"";
+    return os;
+}
+
+class AAA : public A, public AA
+{
+public:
+    AAA() : _value(12) {}
+    void At() { std::cout << "At" << std::endl; }
+    void AAt() { std::cout << "AAt" << std::endl; }
+    static std::string toString() { return std::string("this is about AAA : "/* + _value*/); }
+    ~AAA() { std::cout << "AAA" << std::endl; }
+    static need<AAA> output();
+    int _value;
+};
+
 int main(int argc, const char *argv[])
 {
     T s;
@@ -99,5 +184,20 @@ int main(int argc, const char *argv[])
     std::cout << strlen("") << std::endl;
 
     list("%d", 3);
+
+    //ff f;
+    //f.what();
+    //std::cout << f << std::endl;
+    //f<int> *fv = new fff<int>();
+    //fv->what();
+    //f<ff> *w = new ff();
+    //w->what();
+    //A *a = new AAA;
+    //delete a;
+    AAA a;
+    //a.local.operator<< a;
+    std::cout << a.output << std::endl;
+    A *a1 = new AAA();
+    delete a1;
     return 0;
 }

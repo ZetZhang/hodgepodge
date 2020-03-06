@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 1.0.0)
-project(logging)
+project(thread)
 set(CMAKE_BUILD_TYPE "Debug")
 add_compile_options(-std=c++14)
 set(CMAKE_CXX_FLAGS "-g -Wall -lpthread")
@@ -14,5 +14,4 @@ set(CMAKE_CXX_FLAGS "-g -Wall -lpthread")
 #add_definitions(-D_TUSAGE)
 
 file(GLOB SOURCES "*.cpp")
-include_directories(${rigidstructure})
 add_executable(tests ${SOURCES})

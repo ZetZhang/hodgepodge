@@ -1,7 +1,7 @@
 #ifndef __COLOR_H__
 #define __COLOR_H__
 
-#include "noncopy.h"
+#include "rigidstructure/noncopyable.h"
 #include <iostream>
 #include <utility>
 #include <string>
@@ -13,7 +13,7 @@ namespace hdgd
 
 struct Color
 {
-    enum class FontColor {
+    enum class ForeColor {
         BLACK,
         RED,
         GREEN,
@@ -36,18 +36,18 @@ struct Color
         NONE,
         NUM_BACKGROUND_COLOR,
     };
-    static const std::pair<const char*, const char*> portion(Color::FontColor front, Color::BackgroundColor back);
+    static const std::pair<const char*, const char*> portion(Color::ForeColor front, Color::BackgroundColor back);
 };
 
-template<size_t SIZE>
-class ColorStr : public NonCopy
+template<size_t SIZE = 0>
+class ColorStr : public NonCopyable
 {
 public:
     ColorStr() : _data() {}
     ColorStr(const char *buf) : _data(buf) {}
     ColorStr(const std::string &buf) : _data(buf) {}
 
-    const std::string operator()(const char *buf, Color::FontColor front, Color::BackgroundColor back) {
+    const std::string operator()(const char *buf, Color::ForeColor front, Color::BackgroundColor back) {
         const std::pair<const std::string, const std::string> add = Color::portion(front, back);
         return std::string(add.first + buf + add.second);
     }
@@ -56,7 +56,7 @@ public:
         return std::string(_data, SIZE);
     }
 
-    const std::string toString(Color::FontColor front, Color::BackgroundColor back) {
+    const std::string toString(Color::ForeColor front, Color::BackgroundColor back) {
         if (!strlen(_data)) {
             /* error */
             return "";
@@ -67,6 +67,8 @@ public:
 private:
     char _data[SIZE];
 };
+
+#define ColorStr(x) static_assert(false, "missing ColorStr var name")
 
 } // namespace hdgd
 
