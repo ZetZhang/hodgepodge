@@ -41,6 +41,11 @@
 #ifndef __HDGD_STRINGPIECE_H__
 #define __HDGD_STRINGPIECE_H__
 
+#include <cstring>
+#include <string>
+
+using namespace std;
+
 namespace hdgd
 {
 
@@ -60,7 +65,7 @@ class StringPiece
 {
 private:
     const char *ptr_;
-    size_t length;
+    int length_;
 
 public:
 // We provide non-explicit singleton constructors so users can pass
@@ -70,7 +75,7 @@ public:
     StringPiece(const char* str) : ptr_(str), length_(static_cast<int>(strlen(ptr_))) { }
     StringPiece(const unsigned char* str) : ptr_(reinterpret_cast<const char*>(str)), length_(static_cast<int>(strlen(ptr_))) { }
     StringPiece(const string& str) : ptr_(str.data()), length_(static_cast<int>(str.size())) { }
-    StringPiece(const char* offset, size_t len) : ptr_(offset), length_(len) { }
+    StringPiece(const char* offset, int len) : ptr_(offset), length_(len) { }
 // data() may return a pointer to a buffer with embedded NULs, and the
 // returned buffer may or may not be null terminated.  Therefore it is
 // typically a mistake to pass data() to a routine that expects a NUL
@@ -78,21 +83,21 @@ public:
 // this.  Or better yet, change your routine so it does not rely on NUL
 // termination.
     const char* data() const { return ptr_; }
-    size_t size() const { return length_; }
+    int size() const { return length_; }
     bool empty() const { return length_ == 0; }
     const char* begin() const { return ptr_; }
     const char* end() const { return ptr_ + length_; }
     void clear() { ptr_ = NULL; length_ = 0; }
 
-    void set(const char* buffer, size_t len) {
+    void set(const char* buffer, int len) {
         ptr_ = buffer;
         length_ = len;
     }
     void set(const char* str) {
         ptr_ = str;
-        length_ = static_cast<size_t>(strlen(str));
+        length_ = static_cast<int>(strlen(str));
     }
-    void set(const void* buffer, size_t len) {
+    void set(const void* buffer, int len) {
         ptr_ = reinterpret_cast<const char*>(buffer);
         length_ = len;
     }
@@ -161,6 +166,5 @@ template<> struct __type_traits<muduo::StringPiece> {
     typedef __true_type    is_POD_type;
 };
 #endif
-}
 
 #endif
