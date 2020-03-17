@@ -1,5 +1,5 @@
-#ifndef __LOGGING_H__
-#define __LOGGING_H__
+#ifndef __HDGD_LOGGING_H__
+#define __HDGD_LOGGING_H__
 
 namespace hdgd
 {

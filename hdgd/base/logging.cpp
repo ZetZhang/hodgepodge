@@ -1,4 +1,4 @@
-#include "logging.h"
+#include "hdgd/base/logging.h"
 
 #include <cstdlib>
 
@@ -23,7 +23,7 @@ static Logger::LogLevel initLogLevel() {
         return Logger::LogLevel::INFO;
 }
 
-extern Logger::LogLevel g_LogLevel = initLogLevel();
+Logger::LogLevel g_LogLevel = initLogLevel();
 
 } // namespace hdgd
 

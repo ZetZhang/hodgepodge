@@ -1,7 +1,7 @@
-#ifndef __PERRNO_H__
-#define __PERRNO_H__
+#ifndef __HDGD_PERRNO_H__
+#define __HDGD_PERRNO_H__
 
-#include "rigidstructure/noncopyable.h"
+#include "hdgd/base/noncopyable.h"
 #include <pthread.h>
 #include <memory.h>
 
