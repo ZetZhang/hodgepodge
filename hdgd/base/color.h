@@ -53,10 +53,16 @@ struct Color
     };
 
     // FIXME: one line
-    static const std::pair<const char*, const char*> portion(Color::ForeColor front, Color::BackgroundColor back);
-    static /*const*/ std::pair<const char*, const char*>* portionn(Color::ForeColor front, Color::BackgroundColor back);
+    static const std::pair<const char*, const char*> colorPieces(Color::ForeColor fore, Color::BackgroundColor back);
+    static /*const*/ std::pair<const char*, const char*>* colorPiecesn(Color::ForeColor fore, Color::BackgroundColor back);
+    //static [>const<] std::pair<const char*, const char*>* colorPiecesn(Color::Forecolor fore, Color::Backgroundcolor back);
 
-    struct Portion;
+    struct ColorPieces {
+        ColorPieces(Color::ForeColor fore, Color::BackgroundColor back);
+        const std::pair<const char*, const char*> operator()();
+        std::string head;
+        std::string tail;
+    };
 };
 
 // XXX
@@ -66,25 +72,6 @@ static const char* ForeColorCode[static_cast<unsigned char>(Color::ForeColor::NU
 
 static const char* BackgroundColorCode[static_cast<unsigned char>(Color::BackgroundColor::NUM_BACKGROUND_COLOR)] = {
     "40;", "41;", "42;", "43;", "44;", "45;", "46;", "47;", ""
-};
-
-struct Color::Portion {
-    Portion(Color::ForeColor fore, Color::BackgroundColor back) : head(new std::string("\033[")), tail(new std::string("\033[0m")){
-        head->append(BackgroundColorCode[static_cast<unsigned int>(back)]);
-        head->append(ForeColorCode[static_cast<unsigned int>(fore)]);
-    }
-
-    const std::pair<const char*, const char*> operator()() {
-        return std::pair<const char*, const char*>(head->c_str(), tail->c_str());
-    }
-
-    ~Portion() {
-        delete head;
-        delete tail;
-    }
-
-    std::string *head;
-    std::string *tail;
 };
 
 // Normal
@@ -103,7 +90,7 @@ public:
     }
 
     size_t __delegateToCalcVL(size_t cc) {
-        return cc * (strlen(_pieces->head->c_str()) + strlen(_pieces->tail->c_str()));
+        return cc * (strlen(_pieces.head.c_str()) + strlen(_pieces.tail.c_str()));
     }
 
     void __delegateToINITStr(std::string *str, char sp) {
@@ -112,28 +99,27 @@ public:
         uint32_t o = 0, pace = 0;
         if (!idx.empty()) {
             for (uint32_t i = 0; i < idx.size(); i++) {
-                str->append(_pieces->head->c_str());
+                str->append(_pieces.head.c_str());
                 pace = idx[i] - o;
                 o = idx[i] + 1;
                 str->append(std::string(sPtr.data(), pace));
                 sPtr.remove_prefix(pace + 1);
-                str->append(_pieces->tail->c_str());
+                str->append(_pieces.tail.c_str());
                 str->push_back('\n');
             }
         } else {
-            str->append(_pieces->head->c_str() + sPtr.as_string() + _pieces->tail->c_str());
+            str->append(_pieces.head.c_str() + sPtr.as_string() + _pieces.tail.c_str());
         }
     }
 
-    //ColorStr(const char *buf, Color::ForeColor fore, Color::BackgroundColor back) : _pieces(Color::portionn(fore, back)) {
-    ColorStr(const char *buf, Color::ForeColor fore, Color::BackgroundColor back) : _pieces(new Color::Portion(fore, back)) {
+    ColorStr(const char *buf, Color::ForeColor fore, Color::BackgroundColor back) : _pieces(Color::ColorPieces(fore, back)) {
         ::memmove(_data, buf, SIZE);
         _convertPtr = new std::string;
         __delegateToINITStr(_convertPtr, '\n');
         printf("%ld | %s\n", _convertPtr->size(), (*_convertPtr).c_str());
     }
 
-    ColorStr(const std::string &buf, Color::ForeColor fore, Color::BackgroundColor back) : _pieces(new Color::Portion(fore, back)) {
+    ColorStr(const std::string &buf, Color::ForeColor fore, Color::BackgroundColor back) : _pieces(Color::ColorPieces(fore, back)) {
         ::memmove(_data, buf.c_str(), SIZE);
         _convertPtr = new std::string;
         __delegateToINITStr(_convertPtr, '\n');
@@ -148,7 +134,7 @@ public:
 
     ColorStr& operator=(ColorStr &&x) noexcept {
         if (this != &x) {
-            delete _pieces;
+            //delete _pieces;
             _pieces = x._pieces;
             std::memmove(_data, x._data, SIZE);
             ::memset(_data, '\0', SIZE);
@@ -164,7 +150,7 @@ public:
             delete _convertPtr;
         }
         ::memset(_data, '\0', SIZE);
-        delete _pieces;
+        //delete _pieces;
     }
 
     const std::string operator()() {
@@ -173,8 +159,8 @@ public:
 
     // FIXME: should be return the string piece
     const std::string operator()(const char *buf, Color::ForeColor fore, Color::BackgroundColor back) {
-        //const std::pair<const std::string, const std::string> pieces = Color::portion(front, back);
-        const std::pair<const char*, const char*> pieces = Color::portion(fore, back);
+        //const std::pair<const std::string, const std::string> pieces = Color::colorPieces(front, back);
+        const std::pair<const char*, const char*> pieces = Color::colorPieces(fore, back);
         // FIXME: Parsing the output problem of newline segments
 #ifdef DEBUG
         //std::string tmp(std::string(pieces.first) + buf + std::string(pieces.second));
@@ -186,11 +172,14 @@ public:
         //return std::string(pieces.first + buf + pieces.second);
     }
 
-    std::string fromString() {
-        return std::string(_data, SIZE);
+    const char* originalString() {
+        return _data;
     }
 
-    const std::string toString(Color::ForeColor front, Color::BackgroundColor back) {
+    const std::string toColoredString(Color::ForeColor front, Color::BackgroundColor back) {
+        //if (_pieces != nullptr) {
+            //delete _pieces;
+        //}
         if (!strlen(_data)) {
             /* XXX: There is no zero length anymore */
             return nullptr;
@@ -199,9 +188,12 @@ public:
         }
     }
 private:
-    Color::Portion *_pieces;
+    Color::ColorPieces _pieces;
+    //std::pair<const char*, const char*> _pieces;
     char _data[SIZE];
     std::string *_convertPtr;
+    char *convertPtr;
+    //std::vector<uint32_t> _charsIndex;
 
     ColorStr() = delete;
 };
@@ -216,7 +208,7 @@ public:
 
     // XXX:只适合单行
     const std::string operator()(const char *buf, Color::ForeColor fore, Color::BackgroundColor back) {
-        const std::pair<const char*, const char*> pieces = Color::portion(fore, back);
+        const std::pair<const char*, const char*> pieces = Color::colorPieces(fore, back);
         return std::string(std::string(pieces.first) + buf + std::string(pieces.second));
     }
 private:

@@ -31,20 +31,26 @@ void checkForNontypeTemplate() {
 void checkForTypeTemplate() {
     P("Normal template ColorStr<size_t> testing...");
 
-    ColorStr<20> colorStr;
-    printf("Color test: %s\n",
-            colorStr("Green forecolor & Red backgroundcolor",
-                Color::ForeColor::RED,
-                Color::BackgroundColor::GREEN_BACK).c_str());
-    ColorStr<20> otherColorStr = std::move(colorStr);
-    printf("Color test: %s\n",
-            otherColorStr("Blue forecolor & White backgroundcolor",
-                Color::ForeColor::BLUE,
-                Color::BackgroundColor::WHITE_BACK).c_str());
-    printf("Color test: %s\n",
-            colorStr("Blue forecolor & Non backgroundcolor",
-                Color::ForeColor::BLUE,
-                Color::BackgroundColor::NONE).c_str());
+    //char buf[9] = "fuckyou";
+    //ColorStr<9> colorStr("fuck you");
+    //printf("Color test: %s\n",
+            //colorStr("Green forecolor & Red backgroundcolor",
+                //Color::ForeColor::RED,
+                //Color::BackgroundColor::GREEN_BACK).c_str());
+    //// ColorStr<19> otherColorStr = std::move(colorStr);// must be error
+    //ColorStr<9> otherColorStr(std::move(colorStr));     // ok
+    //// ColorStr<9> otherColorStr = std::move(colorStr); // ok
+    //printf("Color test: %s\n",
+            //otherColorStr("Blue forecolor & White backgroundcolor",
+                //Color::ForeColor::BLUE,
+                //Color::BackgroundColor::WHITE_BACK).c_str());
+    //printf("Color test: %s\n",
+            //colorStr("Blue forecolor & Non backgroundcolor",
+                //Color::ForeColor::BLUE,
+                //Color::BackgroundColor::NONE).c_str());
+
+    ColorStr<32> colorStr("fuck you\nyoumaster\nok\nfsdfsdfas\n", Color::ForeColor::RED, Color::BackgroundColor::GREEN_BACK);
+    //ColorStr<32> colorStr("fuck you ", Color::ForeColor::RED, Color::BackgroundColor::GREEN_BACK);
 
     P("Done");
 }
@@ -84,27 +90,27 @@ void checkForBasicBGColor() {
     P("Done");
 }
 
-void checkForColorPortion() {
-    const std::pair<const char*, const char*> pieces_1 = Color::portion(Color::ForeColor::GREEN, Color::BackgroundColor::NONE);
+void checkForColorColorPieces() {
+    const std::pair<const char*, const char*> pieces_1 = Color::colorPieces(Color::ForeColor::GREEN, Color::BackgroundColor::NONE);
     printf("[%s, %s]\n", pieces_1.first, pieces_1.second);
     assert(strlen(pieces_1.first) == 5/*, "string 1 color piece head"*/);
     assert(strlen(pieces_1.second) == 4/*, "string 2 color piece tail"*/);
-    assert((strlen(pieces_1.first) + strlen(pieces_1.second)) == 9/*, "string' length per portion"*/);
-    const std::pair<const char*, const char*> pieces_2 = Color::portion(Color::ForeColor::BLUE, Color::BackgroundColor::RED_BACK);
+    assert((strlen(pieces_1.first) + strlen(pieces_1.second)) == 9/*, "string' length per colorPieces"*/);
+    const std::pair<const char*, const char*> pieces_2 = Color::colorPieces(Color::ForeColor::BLUE, Color::BackgroundColor::RED_BACK);
     assert(strlen(pieces_2.first) == 8/*, "string 2 color piece head"*/);
     assert(strlen(pieces_2.second) == 4/*, "string 2 color piece tail"*/);
-    assert((strlen(pieces_2.first) + strlen(pieces_2.second)) == 12/*, "string' length per portion"*/);
+    assert((strlen(pieces_2.first) + strlen(pieces_2.second)) == 12/*, "string' length per colorPieces"*/);
     printf("{%s, %s}\n", pieces_2.first, pieces_2.second);
 }
 
 int main(int argc, const char *argv[])
 {
-    checkForNontypeTemplate();
+    //checkForNontypeTemplate();
     checkForTypeTemplate();
 
-    checkForBasicFColor();
-    checkForBasicBGColor();
+    //checkForBasicFColor();
+    //checkForBasicBGColor();
 
-    checkForColorPortion();
+    //checkForColorColorPieces();
     return 0;
 }

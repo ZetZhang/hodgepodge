@@ -132,6 +132,28 @@ public:
     int _value;
 };
 
+struct pieces {
+    pieces() : _s(std::string("fuck you test")) {}
+    std::string _s;
+};
+
+struct piece {
+    piece() {
+        std::string f("fuck");
+        std::string s("you");
+        _s = std::make_pair(f.c_str(), s.c_str());
+    }
+    void set(std::string f, std::string s) {
+        _s = std::make_pair(f.c_str(), s.c_str());
+    }
+    std::pair<const char*, const char *> _s;
+};
+
+const char* getpie() {
+    std::string spi("get test...");
+    return spi.c_str();
+}
+
 int main(int argc, const char *argv[])
 {
     const char *str[2] = { "A", "B" };
@@ -176,5 +198,21 @@ int main(int argc, const char *argv[])
     //std::cout << a.output << std::endl;
     A *a1 = new AAA();
     delete a1;
+
+    const char *pie = getpie();
+    std::cout << pie << std::endl;
+    {
+        pieces pc;
+        pie = pc._s.c_str();
+    }
+    std::cout << pie << std::endl;
+    {
+        piece pc;
+        std::string s1("s1");
+        std::string s2("s2");
+        pc.set(s1, s2);
+        pie = pc._s.first;
+    }
+    std::cout << pie << std::endl;
     return 0;
 }
