@@ -49,7 +49,7 @@ void checkForTypeTemplate() {
                 //Color::ForeColor::BLUE,
                 //Color::BackgroundColor::NONE).c_str());
 
-    ColorStr<32> colorStr("fuck you\nyoumaster\nok\nfsdfsdfas\n", Color::ForeColor::RED, Color::BackgroundColor::GREEN_BACK);
+    //ColorStr<32> colorStr("fuck you\nyoumaster\nok\nfsdfsdfas\n", Color::ForeColor::RED, Color::BackgroundColor::GREEN_BACK);
     //ColorStr<32> colorStr("fuck you ", Color::ForeColor::RED, Color::BackgroundColor::GREEN_BACK);
 
     P("Done");
@@ -91,16 +91,16 @@ void checkForBasicBGColor() {
 }
 
 void checkForColorColorPieces() {
-    const std::pair<const char*, const char*> pieces_1 = Color::colorPieces(Color::ForeColor::GREEN, Color::BackgroundColor::NONE);
-    printf("[%s, %s]\n", pieces_1.first, pieces_1.second);
-    assert(strlen(pieces_1.first) == 5/*, "string 1 color piece head"*/);
-    assert(strlen(pieces_1.second) == 4/*, "string 2 color piece tail"*/);
-    assert((strlen(pieces_1.first) + strlen(pieces_1.second)) == 9/*, "string' length per colorPieces"*/);
-    const std::pair<const char*, const char*> pieces_2 = Color::colorPieces(Color::ForeColor::BLUE, Color::BackgroundColor::RED_BACK);
-    assert(strlen(pieces_2.first) == 8/*, "string 2 color piece head"*/);
-    assert(strlen(pieces_2.second) == 4/*, "string 2 color piece tail"*/);
-    assert((strlen(pieces_2.first) + strlen(pieces_2.second)) == 12/*, "string' length per colorPieces"*/);
-    printf("{%s, %s}\n", pieces_2.first, pieces_2.second);
+    //const std::pair<const char*, const char*> pieces_1 = Color::colorPieces(Color::ForeColor::GREEN, Color::BackgroundColor::NONE);
+    //printf("[%s, %s]\n", pieces_1.first, pieces_1.second);
+    //assert(strlen(pieces_1.first) == 5[>, "string 1 color piece head"<]);
+    //assert(strlen(pieces_1.second) == 4[>, "string 2 color piece tail"<]);
+    //assert((strlen(pieces_1.first) + strlen(pieces_1.second)) == 9[>, "string' length per colorPieces"<]);
+    //const std::pair<const char*, const char*> pieces_2 = Color::colorPieces(Color::ForeColor::BLUE, Color::BackgroundColor::RED_BACK);
+    //assert(strlen(pieces_2.first) == 8[>, "string 2 color piece head"<]);
+    //assert(strlen(pieces_2.second) == 4[>, "string 2 color piece tail"<]);
+    //assert((strlen(pieces_2.first) + strlen(pieces_2.second)) == 12[>, "string' length per colorPieces"<]);
+    //printf("{%s, %s}\n", pieces_2.first, pieces_2.second);
 }
 
 int main(int argc, const char *argv[])

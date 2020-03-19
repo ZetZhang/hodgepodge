@@ -109,11 +109,11 @@ void Prompt::exitPromptEN(int errn, const char *format, ...) {
 void Prompt::_ExitPrompt(const char *format, ...) {
     va_list argList;
     va_start(argList, format);
-    //ColorStr<40> colorStr;
-    //__outputPrompt(true, errno,
-            //colorStr(format, Color::ForeColor::RED, Color::BackgroundColor::WHITE_BACK), argList);
-    ColorStr<40> colorStr(format, Color::ForeColor::RED, Color::BackgroundColor::WHITE_BACK);
-    __outputPrompt(true, errno, colorStr(), argList);
+    ColorStr<0> colorStr;
+    __outputPrompt(true, errno,
+            colorStr(format, Color::ForeColor::RED, Color::BackgroundColor::WHITE_BACK), argList);
+    //ColorStr<40> colorStr(format, Color::ForeColor::RED, Color::BackgroundColor::WHITE_BACK);
+    //__outputPrompt(true, errno, colorStr(), argList);
     //__outputPrompt(true, errno, format, argList);
     va_end(argList);
     __terminate(false);
