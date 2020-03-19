@@ -103,6 +103,49 @@ void checkForColorColorPieces() {
     //printf("{%s, %s}\n", pieces_2.first, pieces_2.second);
 }
 
+// FIXME: 垃圾
+void newCheck() {
+    // 链式build
+    Color::ColorPiece *piece = Color::ColorPiece::New()
+        ->setForeColor(Color::ForeColor::BLACK)
+        ->setBackgroundColor(Color::BackgroundColor::WHITE_BACK)
+        //->setHighLight()
+        //->setUnderLine()
+        ->setFlash()
+        //->setReverseVideo()
+        //->setBlank()
+        ->build();
+    // 取头尾两块颜色格式片
+    std::cout << piece->head() << "piece testing line..." << piece->tail() << std::endl;
+    // pointer：同一个地址
+    Color::ColorPiece *piece1(std::move(piece));
+    std::cout << piece1->head() << "piece1 testing line..." << piece1->tail() << std::endl;
+
+    delete piece1;
+    // FIXME: ERROR: move construction by pointer
+    //Color::ColorPiece piece2(std::move(*piece1));
+
+    Color::ColorPiece piece3;
+    piece3.setForeColor(Color::ForeColor::BLUE);
+    piece3.setBackgroundColor(Color::BackgroundColor::YELLOW_BACK);
+    piece3.setFlash();
+    piece3.build();
+    std::cout << piece3.head() << "piece3 testing line..." << piece3.tail() << std::endl;
+
+    // move construction
+    Color::ColorPiece piece4(std::move(piece3));
+    piece4.reset(Color::ForeColor::BLUE, Color::BackgroundColor::BLUE_BACK);
+    piece4.setFlash(false);
+    piece4.condBuild();
+    std::cout << piece4.head() << "piece4 testing line..." << piece4.tail() << std::endl;
+    // move assigement
+    Color::ColorPiece piece5 = std::move(piece4);
+    piece5.resetAll();
+    piece5.setFlash(true);
+    piece5.condBuild();
+    std::cout << piece5.head() << "piece5 testing line..." << piece4.tail() << std::endl;
+}
+
 int main(int argc, const char *argv[])
 {
     //checkForNontypeTemplate();
@@ -112,5 +155,7 @@ int main(int argc, const char *argv[])
     //checkForBasicBGColor();
 
     //checkForColorColorPieces();
+
+    newCheck();
     return 0;
 }

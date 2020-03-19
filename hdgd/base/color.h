@@ -57,48 +57,53 @@ struct Color
     static const std::pair<const char*, const char*> portion(Color::ForeColor fore, Color::BackgroundColor back);
     static /*const*/ std::pair<const char*, const char*>* portionn(Color::ForeColor fore, Color::BackgroundColor back);
 
+    // 内部类
     class ColorPiece;
 };
 
-class Color::ColorPiece {
+class Color::ColorPiece : NonCopyable {
 public:
-    // Color::ColorPiece::New().set().set().set().set().build();
-    static ColorPiece& New() { ColorPiece *ret = new ColorPiece(); return *ret; }
+    // Color::ColorPiece::New()->set()->set()->set()->set()->build();
+    // 链式写法需调用
+    static ColorPiece* New() { ColorPiece *ret = new ColorPiece(); return ret; }
     ColorPiece();
     ColorPiece(Color::ForeColor fore, Color::BackgroundColor back);
+    // move
     ColorPiece(ColorPiece &&x) noexcept;
     ColorPiece& operator=(ColorPiece &&x) noexcept;
 
     const std::pair<const char*, const char*> operator()();
     const std::pair<const char*, const char*> getColorPiece();
+    void reset();
+    void resetAll();
     void reset(Color::ForeColor fore, Color::BackgroundColor back);
 
-    ColorPiece& setForeColor(Color::ForeColor fore);
-    ColorPiece& setBackgroundColor(Color::BackgroundColor back);
-    ColorPiece& setForeColor(bool flag);
-    ColorPiece& setBackgroundColor(bool flag);
-    ColorPiece& setHightLight(bool flag);
-    ColorPiece& setUnderLine(bool flag);
-    ColorPiece& setFlash(bool flag);
-    ColorPiece& setReverseVideo(bool flag);
-    ColorPiece& setBlank(bool flag);
-    ColorPiece& build();
-    void setNo(bool flag);
+    ColorPiece* setForeColor(Color::ForeColor fore);
+    ColorPiece* setBackgroundColor(Color::BackgroundColor back);
 
-    ColorPiece& setHightLight();
-    ColorPiece& setUnderLine();
-    ColorPiece& setFlash();
-    ColorPiece& setReverseVideo();
-    ColorPiece& setBlank();
+    ColorPiece* setHighLight();
+    ColorPiece* setUnderLine();
+    ColorPiece* setFlash();
+    ColorPiece* setReverseVideo();
+    ColorPiece* setBlank();
+    ColorPiece* build();
+
+    ColorPiece* setHighLight(bool flag);
+    ColorPiece* setUnderLine(bool flag);
+    ColorPiece* setFlash(bool flag);
+    ColorPiece* setReverseVideo(bool flag);
+    ColorPiece* setBlank(bool flag);
+    ColorPiece* condBuild();
 
     const char* head() { return _head->c_str(); }
     const char* tail() { return _tail; }
+
     ~ColorPiece();
+
 private:
     uint8_t _colorPieceFL;
-    //char *_head;
     std::string *_head;
-    char *_tail;
+    const char *_tail;
 };
 
 // XXX
@@ -109,10 +114,6 @@ static const char* ForeColorCode[static_cast<unsigned char>(Color::ForeColor::NU
 static const char* BackgroundColorCode[static_cast<unsigned char>(Color::BackgroundColor::NUM_BACKGROUND_COLOR)] = {
     "40", "41", "42", "43", "44", "45", "46", "47", "",
 };
-
-//static const char* DisplayEffectBitCode[7] = {
-    //"0", "1", "4", "5", "7", "8"
-//}
 
 // Normal
 template<size_t SIZE>
@@ -130,7 +131,7 @@ public:
     }
 
     size_t __delegateToCalcVL(size_t cc) {
-        return cc * (strlen(_pieces->head()) + strlen(_pieces->tail()));
+        return cc * (strlen(_pieces.head()) + strlen(_pieces.tail()));
     }
 
     void __delegateToINITStr(std::string *str, char sp) {
@@ -139,34 +140,34 @@ public:
         uint32_t o = 0, pace = 0;
         if (!idx.empty()) {
             for (uint32_t i = 0; i < idx.size(); i++) {
-                str->append(_pieces->head());
+                str->append(_pieces.head());
                 pace = idx[i] - o;
                 o = idx[i] + 1;
                 str->append(std::string(sPtr.data(), pace));
                 sPtr.remove_prefix(pace + 1);
-                str->append(_pieces->tail());
+                str->append(_pieces.tail());
                 str->push_back('\n');
             }
         } else {
-            str->append(_pieces->head() + sPtr.as_string() + _pieces->tail());
+            str->append(_pieces.head() + sPtr.as_string() + _pieces.tail());
         }
     }
 
-    ColorStr(const char *buf, Color::ColorPiece *cp) : _pieces(cp) {
+    ColorStr(const char *buf, Color::ColorPiece cp) : _pieces(std::move(cp)) {
         ::memmove(_data, buf, SIZE);
         _convertPtr = new std::string;
         __delegateToINITStr(_convertPtr, '\n');
         printf("%ld | %s\n", _convertPtr->size(), (*_convertPtr).c_str());
     }
 
-    ColorStr(const std::string &buf, Color::ColorPiece *cp) : _pieces(cp) {
+    ColorStr(const std::string &buf, Color::ColorPiece cp) : _pieces(std::move(cp)) {
         ::memmove(_data, buf.c_str(), SIZE);
         _convertPtr = new std::string;
         __delegateToINITStr(_convertPtr, '\n');
     }
 
     // XXX: 没有意义
-    ColorStr(ColorStr &&x) noexcept : _pieces(x._pieces), _convertPtr(x._convertPtr) {
+    ColorStr(ColorStr &&x) noexcept : _pieces(std::move(x._pieces)), _convertPtr(x._convertPtr) {
         std::memmove(_data, x._data, SIZE);
         ::memset(_data, '\0', SIZE);
         x._convertPtr = nullptr;
@@ -174,8 +175,7 @@ public:
 
     ColorStr& operator=(ColorStr &&x) noexcept {
         if (this != &x) {
-            //delete _pieces;
-            _pieces = x._pieces;
+            _pieces = std::move(x._pieces);
             std::memmove(_data, x._data, SIZE);
             ::memset(_data, '\0', SIZE);
             delete _convertPtr;
@@ -190,7 +190,6 @@ public:
             delete _convertPtr;
         }
         ::memset(_data, '\0', SIZE);
-        //delete _pieces;
     }
 
     const std::string operator()() {
@@ -217,9 +216,6 @@ public:
     }
 
     const std::string toColoredString(Color::ForeColor front, Color::BackgroundColor back) {
-        //if (_pieces != nullptr) {
-            //delete _pieces;
-        //}
         if (!strlen(_data)) {
             /* XXX: There is no zero length anymore */
             return nullptr;
@@ -228,7 +224,7 @@ public:
         }
     }
 private:
-    Color::ColorPiece *_pieces;
+    Color::ColorPiece _pieces;
     //std::pair<const char*, const char*> _pieces;
     char _data[SIZE];
     std::string *_convertPtr;
