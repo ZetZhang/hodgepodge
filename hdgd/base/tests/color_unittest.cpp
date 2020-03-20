@@ -16,7 +16,7 @@ void checkForNontypeTemplate() {
     printf("Color test: %s\n",
             colorStr("Green forecolor & Red backgroundcolor",
                 Color::ForeColor::GREEN,
-                Color::BackgroundColor::RED_BACK).c_str());
+                Color::BackgroundColor::RED_BACK));
 
     // Correct: Used the removed move function
     //ColorStr<0> otherColorStr = std::move(colorStr);
@@ -31,7 +31,6 @@ void checkForNontypeTemplate() {
 void checkForTypeTemplate() {
     P("Normal template ColorStr<size_t> testing...");
 
-    //char buf[9] = "fuckyou";
     //ColorStr<9> colorStr("fuck you");
     //printf("Color test: %s\n",
             //colorStr("Green forecolor & Red backgroundcolor",
@@ -49,8 +48,11 @@ void checkForTypeTemplate() {
                 //Color::ForeColor::BLUE,
                 //Color::BackgroundColor::NONE).c_str());
 
-    //ColorStr<32> colorStr("fuck you\nyoumaster\nok\nfsdfsdfas\n", Color::ForeColor::RED, Color::BackgroundColor::GREEN_BACK);
-    //ColorStr<32> colorStr("fuck you ", Color::ForeColor::RED, Color::BackgroundColor::GREEN_BACK);
+    ColorStr<12> colorStr("test a\nb\nc\nd", Color::ForeColor::BLUE, Color::BackgroundColor::YELLOW_BACK);
+    std::cout << colorStr.originalString() << " -> " << colorStr.toColoredString() << std::endl;
+    ColorStr<12> moveStr(std::move(colorStr));  // move construction
+    std::cout << moveStr.originalString() << " -> " << moveStr.toColoredString() <<
+        " -> " << moveStr.toColoredString(Color::ForeColor::YELLOW, Color::BackgroundColor::GREEN_BACK) << std::endl;
 
     P("Done");
 }
@@ -66,7 +68,7 @@ void checkForBasicFColor() {
                 // XXX: Will be come back and append the line cut
                 colorStr("ForeColor Display...\n",
                     static_cast<Color::ForeColor>(fColorIterator),
-                    Color::BackgroundColor::NONE).c_str());
+                    Color::BackgroundColor::NONE));
     }
 
     P("Done");
@@ -84,23 +86,10 @@ void checkForBasicBGColor() {
                 // XXX: Will be come back and append the line cut
                 colorStr("BackgroundColor Display...\n",
                     Color::ForeColor::WHITE,
-                    static_cast<Color::BackgroundColor>(bGColorIterator)).c_str());
+                    static_cast<Color::BackgroundColor>(bGColorIterator)));
     }
 
     P("Done");
-}
-
-void checkForColorColorPieces() {
-    //const std::pair<const char*, const char*> pieces_1 = Color::colorPieces(Color::ForeColor::GREEN, Color::BackgroundColor::NONE);
-    //printf("[%s, %s]\n", pieces_1.first, pieces_1.second);
-    //assert(strlen(pieces_1.first) == 5[>, "string 1 color piece head"<]);
-    //assert(strlen(pieces_1.second) == 4[>, "string 2 color piece tail"<]);
-    //assert((strlen(pieces_1.first) + strlen(pieces_1.second)) == 9[>, "string' length per colorPieces"<]);
-    //const std::pair<const char*, const char*> pieces_2 = Color::colorPieces(Color::ForeColor::BLUE, Color::BackgroundColor::RED_BACK);
-    //assert(strlen(pieces_2.first) == 8[>, "string 2 color piece head"<]);
-    //assert(strlen(pieces_2.second) == 4[>, "string 2 color piece tail"<]);
-    //assert((strlen(pieces_2.first) + strlen(pieces_2.second)) == 12[>, "string' length per colorPieces"<]);
-    //printf("{%s, %s}\n", pieces_2.first, pieces_2.second);
 }
 
 // FIXME: 垃圾
@@ -121,7 +110,10 @@ void newCheck() {
     Color::ColorPiece *piece1(std::move(piece));
     std::cout << piece1->head() << "piece1 testing line..." << piece1->tail() << std::endl;
 
+    std::pair<const char*, const char*> piece_trait = piece1->getColorPiece();
     delete piece1;
+
+    std::cout << piece_trait.first << "piece trait testing line..." << piece_trait.second << std::endl;
     // FIXME: ERROR: move construction by pointer
     //Color::ColorPiece piece2(std::move(*piece1));
 
@@ -143,7 +135,8 @@ void newCheck() {
     piece5.resetAll();
     piece5.setFlash(true);
     piece5.condBuild();
-    std::cout << piece5.head() << "piece5 testing line..." << piece4.tail() << std::endl;
+    std::pair<const char*, const char*> piecePair = piece5.getColorPiece();
+    std::cout << piecePair.first << "piece5 testing line..." << piecePair.second << std::endl;
 }
 
 int main(int argc, const char *argv[])
@@ -151,10 +144,8 @@ int main(int argc, const char *argv[])
     //checkForNontypeTemplate();
     checkForTypeTemplate();
 
-    //checkForBasicFColor();
-    //checkForBasicBGColor();
-
-    //checkForColorColorPieces();
+    checkForBasicFColor();
+    checkForBasicBGColor();
 
     newCheck();
     return 0;
