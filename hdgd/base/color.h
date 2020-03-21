@@ -11,6 +11,7 @@
 #include <array>
 #include <vector>
 
+#if 0
 static void PRI(const char *buf)
 {
     char ch;
@@ -20,6 +21,7 @@ static void PRI(const char *buf)
         printf("%c,", static_cast<char>(ch));
     printf("]\n");
 }
+#endif
 
 namespace hdgd
 {
@@ -35,6 +37,7 @@ struct Color
         PURPLE,
         SKYBLUE,
         WHITE,
+        NONE,
         NUM_FORE_COLOR,
     };
 
@@ -93,7 +96,7 @@ public:
 
     bool isReadable();
 
-    const char* head() { return _head->c_str(); }
+    const char* head() { return _head->data(); }
     const char* tail() { return _tail; }
 
     ~ColorPiece();
@@ -106,11 +109,11 @@ private:
 
 // XXX
 static const char* ForeColorCode[static_cast<unsigned char>(Color::ForeColor::NUM_FORE_COLOR)] = {
-    "30", "31", "32", "33", "34", "35", "36", "37",
+    "30", "31", "32", "33", "34", "35", "36", "37", "39"
 };
 
 static const char* BackgroundColorCode[static_cast<unsigned char>(Color::BackgroundColor::NUM_BACKGROUND_COLOR)] = {
-    "40", "41", "42", "43", "44", "45", "46", "47", "48"/*?*/,
+    "40", "41", "42", "43", "44", "45", "46", "47", "49",
 };
 
 // Normal
@@ -134,53 +137,54 @@ public:
 
     void __delegateToINITStr(std::string *str, char sp) {
         std::vector<uint32_t> idx = __delegateToCountChar(sp);
-        StringPiece sPtr(_data);
+        StringPiece hP(_data.data());
         uint32_t o = 0, pace = 0;
         if (!idx.empty()) {
+            if (str->size() >= hP.size())
+                str->clear();
             for (uint32_t i = 0; i < idx.size(); i++) {
                 str->append(_pieces->head());
                 pace = idx[i] - o;
                 o = idx[i] + 1;
-                str->append(std::string(sPtr.data(), pace));
-                sPtr.remove_prefix(pace + 1);
+                str->append(std::string(hP.data(), pace));
+                hP.remove_prefix(pace + 1);
                 str->append(_pieces->tail());
                 str->push_back('\n');
             }
+            if (!hP.empty()) {
+                str->append(_pieces->head());
+                str->append(hP.data());
+                str->append(_pieces->tail());
+            }
         } else {
-            str->append(_pieces->head() + sPtr.as_string() + _pieces->tail());
+            str->append(_pieces->head() + hP.as_string() + _pieces->tail());
         }
     }
 
-    ColorStr(const char *buf, Color::ForeColor fore, Color::BackgroundColor back) : _pieces(Color::ColorPiece::New()
+    ColorStr(const char *buf, Color::ForeColor fore, Color::BackgroundColor back) : _data(buf), _pieces(Color::ColorPiece::New()
             ->setForeColor(fore)
             ->setBackgroundColor(back)
             ->build()), _convertPtr(new std::string){
-        fromString(buf);
         __delegateToINITStr(_convertPtr, '\n');
     }
 
-    ColorStr(const std::string &buf, Color::ForeColor fore, Color::BackgroundColor back) : _pieces(Color::ColorPiece::New()
+    ColorStr(const std::string &buf, Color::ForeColor fore, Color::BackgroundColor back) : _data(buf), _pieces(Color::ColorPiece::New()
             ->setForeColor(fore)
             ->setBackgroundColor(back)
             ->build()), _convertPtr(new std::string) {
-        fromString(buf.c_str());
         __delegateToINITStr(_convertPtr, '\n');
     }
 
     // XXX: 没有意义
-    ColorStr(ColorStr &&x) noexcept : _pieces(x._pieces), _convertPtr(x._convertPtr) {
-        std::memmove(_data, x._data, SIZE);
-        ::memset(x._data, '\0', SIZE);
+    ColorStr(ColorStr &&x) noexcept : _data(x._data), _pieces(x._pieces), _convertPtr(x._convertPtr) {
         x._convertPtr = nullptr;
         x._pieces = nullptr;
     }
 
     ColorStr& operator=(ColorStr &&x) noexcept {
         if (this != &x) {
-            //delete _pieces;
+            _data = x._data;
             _pieces = x._pieces;
-            std::memmove(_data, x._data, SIZE);
-            ::memset(x._data, '\0', SIZE);
             delete _convertPtr;
             _convertPtr = x._convertPtr;
             x._convertPtr = nullptr;
@@ -192,7 +196,6 @@ public:
     ~ColorStr() noexcept {
         if (_convertPtr != nullptr) delete _convertPtr;
         if (_pieces != nullptr) delete _pieces;
-        ::memset(_data, '\0', SIZE);
     }
 
     const std::string operator()() {
@@ -206,13 +209,18 @@ public:
     }
 
     void fromString(const char *buf) {
-        int cut = std::min(SIZE, strlen(buf));
-        ::memmove(_data, buf, cut);
-        _data[cut] = '\0';
+        size_t cut = std::min(SIZE, strlen(buf));
+        _data.set(buf, cut);
+    }
+
+    void fromString(const std::string &buf) {
+        size_t cut = std::min(SIZE, buf.size());
+        _data.set(buf.data(), cut);
     }
 
     const char* originalString() {
-        return _data;
+        //return _data;
+        return _data.data();
     }
 
     const std::string toColoredString() {
@@ -233,9 +241,16 @@ public:
         reColor(fore, back);
         return (*_convertPtr).c_str();
     }
+
+    friend std::ostream& operator<<(std::ostream& os, const ColorStr &x) {
+        os << *x._convertPtr;
+        return os;
+    }
+
 private:
+    StringPiece _data;
     Color::ColorPiece *_pieces;
-    char _data[SIZE];
+    //char _data[SIZE];
     std::string *_convertPtr;
 
     ColorStr() = delete;
@@ -250,9 +265,11 @@ public:
 
     // XXX:只适合单行
     const std::string operator()(const char *buf, Color::ForeColor fore, Color::BackgroundColor back) {
-        const std::pair<const char*, const char*> pieces = Color::portion(fore, back);
-        return std::string(pieces.first) + buf + std::string(pieces.second);
+        using namespace std;
+        const pair<const char*, const char*> pieces = Color::portion(fore, back);
+        return string(string(pieces.first) + buf + string(pieces.second));
     }
+
 private:
     ColorStr(ColorStr &&) noexcept = delete;
     ColorStr& operator=(ColorStr &&) noexcept = delete;

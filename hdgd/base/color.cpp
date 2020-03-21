@@ -121,7 +121,7 @@ Color::ColorPiece* Color::ColorPiece::condBuild() {
 
 const std::pair<const char*, const char*> Color::ColorPiece::operator()() {
     return _HDGD_GET_BIT_STAT(_colorPieceFL, _HDGD_BIT(7)) != 0
-        ? std::pair<const char*, const char*>(_head->c_str(), _tail)
+        ? std::pair<const char*, const char*>(_head->data(), _tail)
         : std::pair<const char*, const char*>("", "");
 }
 
