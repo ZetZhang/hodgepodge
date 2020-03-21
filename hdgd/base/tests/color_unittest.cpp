@@ -13,10 +13,10 @@ void checkForNontypeTemplate() {
     P("Template partial specialization of the ColorStr<0> testing...");
 
     ColorStr<0> colorStr;
-    printf("Color test: %s\n",
+    printf("Color test: %s",
             colorStr("Green forecolor & Red backgroundcolor",
                 Color::ForeColor::GREEN,
-                Color::BackgroundColor::RED_BACK));
+                Color::BackgroundColor::RED_BACK).c_str());
 
     // Correct: Used the removed move function
     //ColorStr<0> otherColorStr = std::move(colorStr);
@@ -28,31 +28,20 @@ void checkForNontypeTemplate() {
     P("Done");
 }
 
+// FIXME：Sticky Output
 void checkForTypeTemplate() {
     P("Normal template ColorStr<size_t> testing...");
 
-    //ColorStr<9> colorStr("fuck you");
-    //printf("Color test: %s\n",
-            //colorStr("Green forecolor & Red backgroundcolor",
-                //Color::ForeColor::RED,
-                //Color::BackgroundColor::GREEN_BACK).c_str());
-    //// ColorStr<19> otherColorStr = std::move(colorStr);// must be error
-    //ColorStr<9> otherColorStr(std::move(colorStr));     // ok
-    //// ColorStr<9> otherColorStr = std::move(colorStr); // ok
-    //printf("Color test: %s\n",
-            //otherColorStr("Blue forecolor & White backgroundcolor",
-                //Color::ForeColor::BLUE,
-                //Color::BackgroundColor::WHITE_BACK).c_str());
-    //printf("Color test: %s\n",
-            //colorStr("Blue forecolor & Non backgroundcolor",
-                //Color::ForeColor::BLUE,
-                //Color::BackgroundColor::NONE).c_str());
+    ColorStr<40> colorStr("ColorString \nmultiline \ntseting...", Color::ForeColor::BLUE, Color::BackgroundColor::YELLOW_BACK);
+    std::cout << colorStr.originalString() << std::endl;
+    std::cout << colorStr << std::endl;
 
-    ColorStr<12> colorStr("test a\nb\nc\nd", Color::ForeColor::BLUE, Color::BackgroundColor::YELLOW_BACK);
-    std::cout << colorStr.originalString() << " -> " << colorStr.toColoredString() << std::endl;
-    ColorStr<12> moveStr(std::move(colorStr));  // move construction
-    std::cout << moveStr.originalString() << " -> " << moveStr.toColoredString() <<
-        " -> " << moveStr.toColoredString(Color::ForeColor::YELLOW, Color::BackgroundColor::GREEN_BACK) << std::endl;
+
+    ColorStr<40> moveStr(std::move(colorStr));  // move construction
+    //ColorStr<39> moveStr(std::move(colorStr));  // move construction: error
+    std::cout << moveStr << std::endl;
+
+    std::cout << moveStr.toColoredString(Color::ForeColor::YELLOW, Color::BackgroundColor::GREEN_BACK) << std::endl;
 
     P("Done");
 }
@@ -64,11 +53,7 @@ void checkForBasicFColor() {
     for (Color::ForeColor fColorIterator = static_cast<Color::ForeColor>(0);
             fColorIterator < Color::ForeColor::NUM_FORE_COLOR;
             fColorIterator = static_cast<Color::ForeColor>(static_cast<unsigned char>(fColorIterator) + 1)) {
-        printf("%s",
-                // XXX: Will be come back and append the line cut
-                colorStr("ForeColor Display...\n",
-                    static_cast<Color::ForeColor>(fColorIterator),
-                    Color::BackgroundColor::NONE));
+        printf("%s\n", colorStr("ForeColor Display...", static_cast<Color::ForeColor>(fColorIterator), Color::BackgroundColor::NONE).c_str());
     }
 
     P("Done");
@@ -77,16 +62,29 @@ void checkForBasicFColor() {
 void checkForBasicBGColor() {
     P("Basic backgroundColor display...");
 
-    // FIXME: FUCK
     ColorStr<0> colorStr;
     for (Color::BackgroundColor bGColorIterator = static_cast<Color::BackgroundColor>(0);
             bGColorIterator < Color::BackgroundColor::NUM_BACKGROUND_COLOR;
-            bGColorIterator = static_cast<Color::BackgroundColor>(static_cast<unsigned char>(bGColorIterator) + 1)) {
-        printf("%s",
+            bGColorIterator = static_cast<Color::BackgroundColor>(static_cast<unsigned char>(bGColorIterator) + 1))
                 // XXX: Will be come back and append the line cut
-                colorStr("BackgroundColor Display...\n",
-                    Color::ForeColor::WHITE,
-                    static_cast<Color::BackgroundColor>(bGColorIterator)));
+        printf("%s\n", colorStr("BackgroundColor Display...", Color::ForeColor::NONE, static_cast<Color::BackgroundColor>(bGColorIterator)).c_str());
+
+    P("Done");
+}
+
+void checkForBasicColor() {
+    P("Basic CombinationColor display...");
+
+    ColorStr<0> colorStr;
+    for (Color::ForeColor fColorIterator = static_cast<Color::ForeColor>(0);
+            fColorIterator < Color::ForeColor::NUM_FORE_COLOR;
+            fColorIterator = static_cast<Color::ForeColor>(static_cast<unsigned char>(fColorIterator) + 1)) {
+        for (Color::BackgroundColor bGColorIterator = static_cast<Color::BackgroundColor>(0);
+                bGColorIterator < Color::BackgroundColor::NUM_BACKGROUND_COLOR;
+                bGColorIterator = static_cast<Color::BackgroundColor>(static_cast<unsigned char>(bGColorIterator) + 1)) {
+            printf("%s ", colorStr("ColorDisplay...", static_cast<Color::ForeColor>(fColorIterator), static_cast<Color::BackgroundColor>(bGColorIterator)).c_str());
+        }
+        printf("\n\n");
     }
 
     P("Done");
@@ -94,6 +92,8 @@ void checkForBasicBGColor() {
 
 // FIXME: 垃圾
 void newCheck() {
+    P("Original ColorPiece display...");
+
     // 链式build
     Color::ColorPiece *piece = Color::ColorPiece::New()
         ->setForeColor(Color::ForeColor::BLACK)
@@ -137,6 +137,17 @@ void newCheck() {
     piece5.condBuild();
     std::pair<const char*, const char*> piecePair = piece5.getColorPiece();
     std::cout << piecePair.first << "piece5 testing line..." << piecePair.second << std::endl;
+
+    P("Done");
+}
+
+void checkForColorOstream() {
+    P("ColorStr Output by ostream");
+
+    ColorStr<40> colorStr("ColorString multiline\n ostream output", Color::ForeColor::BLUE, Color::BackgroundColor::YELLOW_BACK);
+    std::cout << colorStr << std::endl;
+
+    P("Done");
 }
 
 int main(int argc, const char *argv[])
@@ -146,7 +157,10 @@ int main(int argc, const char *argv[])
 
     checkForBasicFColor();
     checkForBasicBGColor();
+    checkForBasicColor();
 
     newCheck();
+
+    checkForColorOstream();
     return 0;
 }
