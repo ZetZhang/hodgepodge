@@ -28,7 +28,7 @@ static void __terminate(bool useExit) {
         _Exit(EXIT_FAILURE);
 }
 
-static void __outputPrompt(bool useErr, int errn, const char *format, va_list ap) {
+static void __outputPrompt(bool useErr, int errn, const char *format, Color::ForeColor fore, Color::BackgroundColor back, va_list ap) {
     char buf[EO_BUF_SIZE], userMsg[EO_BUF_SIZE], errText[EO_BUF_SIZE];
     // FIXME: About the buffer overflow
     vsnprintf(userMsg, EO_BUF_SIZE, format, ap);
@@ -39,8 +39,8 @@ static void __outputPrompt(bool useErr, int errn, const char *format, va_list ap
         snprintf(errText, EO_BUF_SIZE, ":");
     snprintf(buf, EO_BUF_SIZE, "ERROR%s %s\n", errText, userMsg);
     fflush(stdout);
-    ColorStr<0> colorStr;
-    fputs(buf, stderr);
+    ColorStr<EO_BUF_SIZE> colorStr(buf, fore, back);
+    fputs(colorStr.toColoredCStr(), stderr);
     fflush(stderr);
 }
 
@@ -56,8 +56,7 @@ void Prompt::msgPrompt(const char *format, ...) {
     va_list argList;
     int savedErrno = errno;
     va_start(argList, format);
-    ColorStr<450> colorStr(format, Color::ForeColor::GREEN, Color::BackgroundColor::NONE);
-    __outputPrompt(true, errno, colorStr.toColoredCStr(), argList);
+    __outputPrompt(true, errno, format, Color::ForeColor::BLUE, Color::BackgroundColor::NONE, argList);
     va_end(argList);
     errno = savedErrno;
 }
@@ -66,8 +65,10 @@ void Prompt::usagePrompt(const char *format, ...) {
     va_list argList;
     fflush(stdout);
     va_start(argList, format);
-    ColorStr<450> colorStr(std::string("usage error: " + std::string(format)).c_str(),
-            Color::ForeColor::SKYBLUE, Color::BackgroundColor::NONE);
+    std::string usageBuf("usage error: ");
+    usageBuf.append(format);
+
+    ColorStr<EO_BUF_SIZE> colorStr(usageBuf, Color::ForeColor::SKYBLUE, Color::BackgroundColor::NONE);
     vfprintf(stderr, colorStr.toColoredCStr(), argList);
     va_end(argList);
     fflush(stderr);
@@ -77,8 +78,7 @@ void Prompt::usagePrompt(const char *format, ...) {
 void Prompt::fatalPrompt(const char *format, ...) {
     va_list argList;
     va_start(argList, format);
-    ColorStr<450> colorStr(format, Color::ForeColor::WHITE, Color::BackgroundColor::RED_BACK);
-    __outputPrompt(true, errno, colorStr.toColoredCStr(), argList);
+    __outputPrompt(true, errno, format, Color::ForeColor::WHITE, Color::BackgroundColor::RED_BACK, argList);
     va_end(argList);
     __terminate(true);
 }
@@ -86,8 +86,7 @@ void Prompt::fatalPrompt(const char *format, ...) {
 void Prompt::exitPrompt(const char *format, ...) {
     va_list argList;
     va_start(argList, format);
-    ColorStr<450> colorStr(format, Color::ForeColor::RED, Color::BackgroundColor::NONE);
-    __outputPrompt(true, errno, colorStr.toColoredCStr(), argList);
+    __outputPrompt(true, errno, format, Color::ForeColor::RED, Color::BackgroundColor::NONE, argList);
     va_end(argList);
     __terminate(true);
 }
@@ -95,8 +94,7 @@ void Prompt::exitPrompt(const char *format, ...) {
 void Prompt::exitPromptEN(int errn, const char *format, ...) {
     va_list argList;
     va_start(argList, format);
-    ColorStr<450> colorStr(format, Color::ForeColor::RED, Color::BackgroundColor::NONE);
-    __outputPrompt(true, errno, colorStr.toColoredCStr(), argList);
+    __outputPrompt(true, errno, format, Color::ForeColor::WHITE, Color::BackgroundColor::BLACK_BACK, argList);
     va_end(argList);
     __terminate(true);
 }
@@ -104,8 +102,7 @@ void Prompt::exitPromptEN(int errn, const char *format, ...) {
 void Prompt::_ExitPrompt(const char *format, ...) {
     va_list argList;
     va_start(argList, format);
-    ColorStr<450> colorStr(format, Color::ForeColor::RED, Color::BackgroundColor::WHITE_BACK);
-    __outputPrompt(true, errno, colorStr.toColoredCStr(), argList);
+    __outputPrompt(true, errno, format, Color::ForeColor::RED, Color::BackgroundColor::WHITE_BACK, argList);
     va_end(argList);
     __terminate(false);
 }
