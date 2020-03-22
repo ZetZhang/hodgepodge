@@ -52,5 +52,6 @@
 
 #define __unimplemented() do { } while (0)
 #define __parameter_unused() void
+#define __unused_var(x) do { if (x) {  }; } while (0)
 
 #endif

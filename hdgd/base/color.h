@@ -104,7 +104,7 @@ public:
 private:
     uint8_t _colorPieceFL;
     std::string *_head;
-    char *_tail;
+    const char *_tail;
 };
 
 // XXX
@@ -140,7 +140,7 @@ public:
         StringPiece hP(_data.data());
         uint32_t o = 0, pace = 0;
         if (!idx.empty()) {
-            if (str->size() >= hP.size())
+            if (str->size() >= static_cast<size_t>(hP.size()))
                 str->clear();
             for (uint32_t i = 0; i < idx.size(); i++) {
                 str->append(_pieces->head());
@@ -161,14 +161,16 @@ public:
         }
     }
 
-    ColorStr(const char *buf, Color::ForeColor fore, Color::BackgroundColor back) : _data(buf), _pieces(Color::ColorPiece::New()
+    ColorStr(const char *buf, Color::ForeColor fore, Color::BackgroundColor back) : _data(buf), _pieces(
+            Color::ColorPiece::New()
             ->setForeColor(fore)
             ->setBackgroundColor(back)
             ->build()), _convertPtr(new std::string){
         __delegateToINITStr(_convertPtr, '\n');
     }
 
-    ColorStr(const std::string &buf, Color::ForeColor fore, Color::BackgroundColor back) : _data(buf), _pieces(Color::ColorPiece::New()
+    ColorStr(const std::string &buf, Color::ForeColor fore, Color::BackgroundColor back) : _data(buf), _pieces(
+            Color::ColorPiece::New()
             ->setForeColor(fore)
             ->setBackgroundColor(back)
             ->build()), _convertPtr(new std::string) {

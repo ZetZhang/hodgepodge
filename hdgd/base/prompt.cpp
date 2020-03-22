@@ -29,15 +29,16 @@ static void __terminate(bool useExit) {
 }
 
 static void __outputPrompt(bool useErr, int errn, const char *format, Color::ForeColor fore, Color::BackgroundColor back, va_list ap) {
+    int wlen;
     char buf[EO_BUF_SIZE], userMsg[EO_BUF_SIZE], errText[EO_BUF_SIZE];
     // FIXME: About the buffer overflow
     vsnprintf(userMsg, EO_BUF_SIZE, format, ap);
     if (useErr)
-        snprintf(errText, EO_BUF_SIZE, " [%s %s]:",
+        wlen = snprintf(errText, EO_BUF_SIZE, " [%s %s]:",
                 (errn > 0 && errn <= MAX_ENAME) ? ename[errn] : "?UNKNOWN?", strerror_rT(errn));
     else
-        snprintf(errText, EO_BUF_SIZE, ":");
-    snprintf(buf, EO_BUF_SIZE, "ERROR%s %s\n", errText, userMsg);
+        wlen = snprintf(errText, 2, ":");
+    snprintf(buf, EO_BUF_SIZE + wlen, "ERROR%s %s\n", errText, userMsg);
     fflush(stdout);
     ColorStr<EO_BUF_SIZE> colorStr(buf, fore, back);
     fputs(colorStr.toColoredCStr(), stderr);

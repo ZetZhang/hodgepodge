@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cassert>
 #include "hdgd/base/timestamp.h"
+#include "hdgd/base/atomic.h"
 
 using namespace hdgd;
 
