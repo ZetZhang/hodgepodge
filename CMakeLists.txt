@@ -12,7 +12,7 @@ set(CXX_FLAGS
     -D_FILE_OFFSET_BITS=64
     -Wall
     -Wextra
-    #-Werror
+    -Werror
     -Wconversion
     -Wno-unused-parameter
     -Wold-style-cast
@@ -21,6 +21,12 @@ set(CXX_FLAGS
     -Wshadow
     -Wwrite-strings
     -march=native
+    -Winline
+    -Wcast-qual
+    -Wunreachable-code
+    #-Waggregate-return
+
+    -Wno-unused-variable
     # -MMD
     -rdynamic
     )

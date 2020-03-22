@@ -9,11 +9,11 @@ add_library(hdgd_base ${BASE_SRCS})
 
 target_link_libraries(hdgd_base pthread)
 
-#file(GLOB HEADERS "*.h")
-#list(APPEND HEADERS "ename.c.inc")
+file(GLOB HEADERS "*.h")
+list(APPEND HEADERS "ename.c.inc")
 
-#install(TARGETS hdgd_base DESTINATION lib)
-#install(FILES ${HEADERS} DESTINATION include/hdgd/base)
+install(TARGETS hdgd_base DESTINATION lib)
+install(FILES ${HEADERS} DESTINATION include/hdgd/base)
 
 #set(FLAG $ENV{_TERROR_SWITCH})
 #if (FLAG)
