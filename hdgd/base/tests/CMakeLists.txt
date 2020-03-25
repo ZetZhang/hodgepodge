@@ -21,3 +21,7 @@ add_test(NAME timestamp_unit_test COMMAND timestamp_unit_test)
 add_executable(color_unit_test color_unittest.cpp)
 target_link_libraries(color_unit_test hdgd_base)
 add_test(NAME color_unit_test COMMAND color_unit_test)
+
+add_executable(atomic_unit_test atomic_unittest.cpp)
+target_link_libraries(atomic_unit_test hdgd_base)
+add_test(NAME atomic_unit_test COMMAND atomic_unit_test)

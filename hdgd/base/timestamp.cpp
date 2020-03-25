@@ -31,7 +31,7 @@ Timestamp Timestamp::now() {
     // XXX: something errno handle
     struct timespec request;
     if (clock_gettime(CLOCK_REALTIME, &request) == -1)
-        Prompt::exitPrompt("clock_gettime error");
+        Prompt::ExitPrompt("clock_gettime error");
     int64_t seconds = request.tv_sec;
     return Timestamp(seconds * 1000000000 + request.tv_nsec);
 }
@@ -50,7 +50,7 @@ std::string Timestamp::toFormattedString(/* const char *fmt */) {
     // %a %b %d %Y %H:%M:%S %p %Z
     //  Fri 06  Mar 2020 11:21:56 PM CST
     // if ((s = strftime(buf, 34, (fmt) ? fmt : "%a %b %d %Y %H:%M:%S %p %Z"), tm) == 0)
-        //Prompt::exitPrompt("formattedString error");
+        //Prompt::ExitPrompt("formattedString error");
     //std::cout << daylight << ":" << timezone << ":" << *tzname << ":" << *(tzname + 1) << std::endl;
     // XXX
     char buf[64] = {0};
@@ -58,7 +58,7 @@ std::string Timestamp::toFormattedString(/* const char *fmt */) {
     struct tm tm_time;
     int8_t payLen = 8;
     if (localtime_r(&seconds, &tm_time) == nullptr)
-        Prompt::exitPrompt("gmtime_r error");
+        Prompt::ExitPrompt("gmtime_r error");
     int32_t milliSeconds = static_cast<int32_t>(_nanoSecondsSinceEpoch % 1000000000 / 1000000);
     int32_t microSeconds = static_cast<int32_t>(_nanoSecondsSinceEpoch % 1000000 / 1000);
     int32_t nanoSeconds = static_cast<int32_t>(_nanoSecondsSinceEpoch % 1000);
