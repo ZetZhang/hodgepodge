@@ -10,7 +10,7 @@
 namespace hdgd
 {
 
-namespace stealth
+namespace detail
 {
 
 __thread char __t_errnobuf[512];
@@ -28,7 +28,7 @@ static void __terminate(bool useExit) {
         _Exit(EXIT_FAILURE);
 }
 
-static void __outputPrompt(bool useErr, int errn, const char *format, Color::ForeColor fore, Color::BackgroundColor back, va_list ap) {
+static void __outputPrompt(bool useErr, int errn, const char *format, color::ForeColor fore, color::BackgroundColor back, va_list ap) {
     int wlen;
     char buf[EO_BUF_SIZE], userMsg[EO_BUF_SIZE], errText[EO_BUF_SIZE];
     // FIXME: About the buffer overflow
@@ -51,51 +51,51 @@ static void __outputPrompt(bool useErr, int errn, const char *format, Color::For
 
 
 using namespace hdgd;
-using namespace hdgd::stealth;
+using namespace hdgd::detail;
 
-void Prompt::msgPrompt(const char *format, ...) {
+void Prompt::MsgPrompt(const char *format, ...) {
     va_list argList;
     int savedErrno = errno;
     va_start(argList, format);
-    __outputPrompt(true, errno, format, Color::ForeColor::BLUE, Color::BackgroundColor::NONE, argList);
+    __outputPrompt(true, errno, format, color::ForeColor::BLUE, color::BackgroundColor::NONE, argList);
     va_end(argList);
     errno = savedErrno;
 }
 
-void Prompt::usagePrompt(const char *format, ...) {
+void Prompt::UsagePrompt(const char *format, ...) {
     va_list argList;
     fflush(stdout);
     va_start(argList, format);
     std::string usageBuf("usage error: ");
     usageBuf.append(format);
 
-    ColorStr<EO_BUF_SIZE> colorStr(usageBuf, Color::ForeColor::SKYBLUE, Color::BackgroundColor::NONE);
+    ColorStr<EO_BUF_SIZE> colorStr(usageBuf, color::ForeColor::SKYBLUE, color::BackgroundColor::NONE);
     vfprintf(stderr, colorStr.toColoredCStr(), argList);
     va_end(argList);
     fflush(stderr);
     exit(EXIT_FAILURE);
 }
 
-void Prompt::fatalPrompt(const char *format, ...) {
+void Prompt::FatalPrompt(const char *format, ...) {
     va_list argList;
     va_start(argList, format);
-    __outputPrompt(true, errno, format, Color::ForeColor::WHITE, Color::BackgroundColor::RED_BACK, argList);
+    __outputPrompt(true, errno, format, color::ForeColor::WHITE, color::BackgroundColor::RED_BACK, argList);
     va_end(argList);
     __terminate(true);
 }
 
-void Prompt::exitPrompt(const char *format, ...) {
+void Prompt::ExitPrompt(const char *format, ...) {
     va_list argList;
     va_start(argList, format);
-    __outputPrompt(true, errno, format, Color::ForeColor::RED, Color::BackgroundColor::NONE, argList);
+    __outputPrompt(true, errno, format, color::ForeColor::RED, color::BackgroundColor::NONE, argList);
     va_end(argList);
     __terminate(true);
 }
 
-void Prompt::exitPromptEN(int errn, const char *format, ...) {
+void Prompt::ExitPromptEN(int errn, const char *format, ...) {
     va_list argList;
     va_start(argList, format);
-    __outputPrompt(true, errno, format, Color::ForeColor::WHITE, Color::BackgroundColor::BLACK_BACK, argList);
+    __outputPrompt(true, errno, format, color::ForeColor::WHITE, color::BackgroundColor::BLACK_BACK, argList);
     va_end(argList);
     __terminate(true);
 }
@@ -103,7 +103,7 @@ void Prompt::exitPromptEN(int errn, const char *format, ...) {
 void Prompt::_ExitPrompt(const char *format, ...) {
     va_list argList;
     va_start(argList, format);
-    __outputPrompt(true, errno, format, Color::ForeColor::RED, Color::BackgroundColor::WHITE_BACK, argList);
+    __outputPrompt(true, errno, format, color::ForeColor::RED, color::BackgroundColor::WHITE_BACK, argList);
     va_end(argList);
     __terminate(false);
 }

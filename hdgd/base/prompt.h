@@ -13,12 +13,12 @@ namespace hdgd
 class Prompt
 {
 public:
-    static void msgPrompt(const char *format, ...) NORETURN;
-    static void usagePrompt(const char *format, ...) NORETURN;
-    static void fatalPrompt(const char *format, ...) NORETURN;
-    static void exitPrompt(const char *format, ...) NORETURN;
+    static void MsgPrompt(const char *format, ...) NORETURN;
+    static void UsagePrompt(const char *format, ...) NORETURN;
+    static void FatalPrompt(const char *format, ...) NORETURN;
+    static void ExitPrompt(const char *format, ...) NORETURN;
     static void _ExitPrompt(const char *format, ...) NORETURN;
-    static void exitPromptEN(int errn, const char *format, ...) NORETURN;
+    static void ExitPromptEN(int errn, const char *format, ...) NORETURN;
 };
 
 //class outputStream;
