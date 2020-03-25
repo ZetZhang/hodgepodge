@@ -12,20 +12,29 @@
     printf("\n");               \
 } while (0)
 
-namespace hdgd
+namespace hdgd::color
 {
 
-Color::ColorPiece::ColorPiece() : _colorPieceFL(0), _head(new std::string("\033[")), _tail("\033[0m") { }
+// XXX
+static const char* ForeColorCode[static_cast<unsigned char>(color::ForeColor::NUM_FORE_COLOR)] = {
+    "30", "31", "32", "33", "34", "35", "36", "37", "39"
+};
+
+static const char* BackgroundColorCode[static_cast<unsigned char>(color::BackgroundColor::NUM_BACKGROUND_COLOR)] = {
+    "40", "41", "42", "43", "44", "45", "46", "47", "49",
+};
+
+ColorPiece::ColorPiece() : _colorPieceFL(0), _head(new std::string("\033[")), _tail("\033[0m") { }
 
 // FIXME
-Color::ColorPiece::ColorPiece(ColorPiece &&x) noexcept : _colorPieceFL(x._colorPieceFL), _head(x._head), _tail(x._tail) {
+ColorPiece::ColorPiece(ColorPiece &&x) noexcept : _colorPieceFL(x._colorPieceFL), _head(x._head), _tail(x._tail) {
     x._colorPieceFL = 0;
     x._head = nullptr;
     x._tail = nullptr;
 }
 
 // FIXME
-Color::ColorPiece& Color::ColorPiece::operator=(ColorPiece &&x) noexcept {
+ColorPiece& ColorPiece::operator=(ColorPiece &&x) noexcept {
     if (this != &x) {
         _colorPieceFL = x._colorPieceFL;
         delete _head;
@@ -38,30 +47,30 @@ Color::ColorPiece& Color::ColorPiece::operator=(ColorPiece &&x) noexcept {
     return *this;
 }
 
-void Color::ColorPiece::reset(Color::ForeColor fore, Color::BackgroundColor back) {
+void ColorPiece::reset(ForeColor fore, BackgroundColor back) {
     if (_colorPieceFL != 0) {
         _head->resize(2);
         _HDGD_SET_BIT_F(_colorPieceFL, _HDGD_BIT(7));
         _HDGD_SET_BIT_F(_colorPieceFL, _HDGD_BIT(0));
         _HDGD_SET_BIT_F(_colorPieceFL, _HDGD_BIT(1));
-        setForeColor(fore)->setBackgroundColor(Color::BackgroundColor::RED_BACK);
+        setForeColor(fore)->setBackgroundColor(BackgroundColor::RED_BACK);
     }
 }
 
-void Color::ColorPiece::resetAll() {
+void ColorPiece::resetAll() {
     if (_colorPieceFL != 0) {
         _head->resize(2);
         _colorPieceFL = 0;
     }
 }
 
-bool Color::ColorPiece::isReadable() {
+bool ColorPiece::isReadable() {
     return _HDGD_GET_BIT_STAT(_colorPieceFL, _HDGD_BIT(7)) == 1;
 }
 
 // 函数生成宏
 #define MANUFACTURE_CONFIGURATION(discrimination, catstr, type, bit)    \
-    Color::ColorPiece* Color::ColorPiece::set##discrimination (type) {  \
+    ColorPiece* ColorPiece::set##discrimination (type) {  \
         if (!_HDGD_GET_BIT_STAT(_colorPieceFL, _HDGD_BIT(bit))) {       \
             if (_colorPieceFL != 0) _head->push_back(';');              \
             _head->append( catstr );                                    \
@@ -71,7 +80,7 @@ bool Color::ColorPiece::isReadable() {
     }
 
 #define MANUFACTURE_CONFIGURATION_R(discrimination, bit)                    \
-    Color::ColorPiece* Color::ColorPiece::set##discrimination (bool flag) { \
+    ColorPiece* ColorPiece::set##discrimination (bool flag) {               \
         _HDGD_U8_COND_SET_BIT(_colorPieceFL, _HDGD_BIT(bit), flag);         \
         return this;                                                        \
     }
@@ -84,8 +93,8 @@ MANUFACTURE_CONFIGURATION_R(Flash, 4);
 MANUFACTURE_CONFIGURATION_R(ReverseVideo, 5);
 MANUFACTURE_CONFIGURATION_R(Blank, 6);
 
-MANUFACTURE_CONFIGURATION(ForeColor, ForeColorCode[static_cast<unsigned int>(fore)], Color::ForeColor fore, 0);
-MANUFACTURE_CONFIGURATION(BackgroundColor, BackgroundColorCode[static_cast<unsigned int>(back)], Color::BackgroundColor back, 1);
+MANUFACTURE_CONFIGURATION(ForeColor, ForeColorCode[static_cast<unsigned int>(fore)], ForeColor fore, 0);
+MANUFACTURE_CONFIGURATION(BackgroundColor, BackgroundColorCode[static_cast<unsigned int>(back)], BackgroundColor back, 1);
 MANUFACTURE_CONFIGURATION(HighLight, "1", __parameter_unused(), 2);
 MANUFACTURE_CONFIGURATION(UnderLine, "4", __parameter_unused(), 3);
 MANUFACTURE_CONFIGURATION(Flash, "5", __parameter_unused(), 4);
@@ -93,7 +102,7 @@ MANUFACTURE_CONFIGURATION(ReverseVideo, "7", __parameter_unused(), 5);
 MANUFACTURE_CONFIGURATION(Blank, "8", __parameter_unused(), 6);
 
 // XXX: build时enable位不设位保持状态，供condBuild重新生成
-Color::ColorPiece* Color::ColorPiece::build() {
+ColorPiece* ColorPiece::build() {
     if (!isReadable()) {
         _head->push_back('m');
         _HDGD_SET_BIT_T(_colorPieceFL, _HDGD_BIT(7));
@@ -101,7 +110,7 @@ Color::ColorPiece* Color::ColorPiece::build() {
     return this;
 }
 
-Color::ColorPiece* Color::ColorPiece::condBuild() {
+ColorPiece* ColorPiece::condBuild() {
     // 输出属性设置Code
     const char *tCode = "14578";
     if (_colorPieceFL == 0)
@@ -119,17 +128,17 @@ Color::ColorPiece* Color::ColorPiece::condBuild() {
     return this;
 }
 
-const std::pair<const char*, const char*> Color::ColorPiece::operator()() {
+const std::pair<const char*, const char*> ColorPiece::operator()() {
     return _HDGD_GET_BIT_STAT(_colorPieceFL, _HDGD_BIT(7)) != 0
         ? std::pair<const char*, const char*>(_head->data(), _tail)
         : std::pair<const char*, const char*>("", "");
 }
 
-const std::pair<const char*, const char*> Color::ColorPiece::getColorPiece() {
+const std::pair<const char*, const char*> ColorPiece::getColorPiece() {
     return operator()();
 }
 
-Color::ColorPiece::~ColorPiece() {
+ColorPiece::~ColorPiece() {
     if (_head) {
         delete _head;
         _head = nullptr;
@@ -140,13 +149,3 @@ Color::ColorPiece::~ColorPiece() {
 } // namespace hdgd
 
 
-using namespace hdgd;
-
-
-const std::pair<const char*, const char*> Color::portion(Color::ForeColor fore, Color::BackgroundColor back) {
-    Color::ColorPiece cp;
-    cp.setForeColor(fore);
-    cp.setBackgroundColor(back);
-    cp.build();
-    return std::make_pair(cp.head(), cp.tail());
-}

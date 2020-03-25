@@ -26,7 +26,8 @@ static void PRI(const char *buf)
 namespace hdgd
 {
 
-struct Color
+//struct Color
+namespace color
 {
     enum class ForeColor {
         BLACK,
@@ -54,19 +55,19 @@ struct Color
         NUM_BACKGROUND_COLOR,
     };
 
-    // FIXME: one line
-    static const std::pair<const char*, const char*> portion(Color::ForeColor fore, Color::BackgroundColor back);
-
     // 内部类
     class ColorPiece;
+
+    // FIXME: one line
+    static const std::pair<const char*, const char*> Portion(ForeColor fore, BackgroundColor back);
 };
 
-class Color::ColorPiece : NonCopyable {
+class color::ColorPiece : NonCopyable {
 public:
-    // Color::ColorPiece::New()->set()->set()->set()->set()->build();
+    // color::ColorPiece::New()->set()->set()->set()->set()->build();
     static ColorPiece* New() { ColorPiece *ret = new ColorPiece(); return ret; }
     ColorPiece();
-    ColorPiece(Color::ForeColor fore, Color::BackgroundColor back);
+    ColorPiece(color::ForeColor fore, color::BackgroundColor back);
     // move
     ColorPiece(ColorPiece &&x) noexcept;
     ColorPiece& operator=(ColorPiece &&x) noexcept;
@@ -75,10 +76,10 @@ public:
     const std::pair<const char*, const char*> getColorPiece();
     void reset();
     void resetAll();
-    void reset(Color::ForeColor fore, Color::BackgroundColor back);
+    void reset(color::ForeColor fore, color::BackgroundColor back);
 
-    ColorPiece* setForeColor(Color::ForeColor fore);
-    ColorPiece* setBackgroundColor(Color::BackgroundColor back);
+    ColorPiece* setForeColor(color::ForeColor fore);
+    ColorPiece* setBackgroundColor(color::BackgroundColor back);
 
     ColorPiece* setHighLight();
     ColorPiece* setUnderLine();
@@ -107,22 +108,20 @@ private:
     const char *_tail;
 };
 
-// XXX
-static const char* ForeColorCode[static_cast<unsigned char>(Color::ForeColor::NUM_FORE_COLOR)] = {
-    "30", "31", "32", "33", "34", "35", "36", "37", "39"
-};
-
-static const char* BackgroundColorCode[static_cast<unsigned char>(Color::BackgroundColor::NUM_BACKGROUND_COLOR)] = {
-    "40", "41", "42", "43", "44", "45", "46", "47", "49",
-};
+const std::pair<const char*, const char*> color::Portion(ForeColor fore, BackgroundColor back) {
+    ColorPiece cp;
+    cp.setForeColor(fore);
+    cp.setBackgroundColor(back);
+    cp.build();
+    return std::make_pair(cp.head(), cp.tail());
+}
 
 // Normal
 template<size_t SIZE>
 class ColorStr : NonCopyable
 {
-public:
+private:
     // XXX
-
     std::vector<uint32_t> __delegateToCountChar(const char &vc) {
         std::vector<uint32_t> idx;
         for (uint32_t i = 0; i < SIZE; i++)
@@ -161,16 +160,17 @@ public:
         }
     }
 
-    ColorStr(const char *buf, Color::ForeColor fore, Color::BackgroundColor back) : _data(buf), _pieces(
-            Color::ColorPiece::New()
+public:
+    ColorStr(const char *buf, color::ForeColor fore, color::BackgroundColor back) : _data(buf), _pieces(
+            color::ColorPiece::New()
             ->setForeColor(fore)
             ->setBackgroundColor(back)
             ->build()), _convertPtr(new std::string){
         __delegateToINITStr(_convertPtr, '\n');
     }
 
-    ColorStr(const std::string &buf, Color::ForeColor fore, Color::BackgroundColor back) : _data(buf), _pieces(
-            Color::ColorPiece::New()
+    ColorStr(const std::string &buf, color::ForeColor fore, color::BackgroundColor back) : _data(buf), _pieces(
+            color::ColorPiece::New()
             ->setForeColor(fore)
             ->setBackgroundColor(back)
             ->build()), _convertPtr(new std::string) {
@@ -204,7 +204,7 @@ public:
         return *_convertPtr;
     }
 
-    void reColor(Color::ForeColor fore, Color::BackgroundColor back) {
+    void reColor(color::ForeColor fore, color::BackgroundColor back) {
         _pieces->reset(fore, back);
         _pieces->build();
         __delegateToINITStr(_convertPtr, '\n');
@@ -233,13 +233,13 @@ public:
         return (*_convertPtr).c_str();
     }
 
-    const std::string toColoredString(Color::ForeColor fore, Color::BackgroundColor back) {
+    const std::string toColoredString(color::ForeColor fore, color::BackgroundColor back) {
         reColor(fore, back);
         // POV?
         return *_convertPtr;
     }
 
-    const char* toColoredCStr(Color::ForeColor fore, Color::BackgroundColor back) {
+    const char* toColoredCStr(color::ForeColor fore, color::BackgroundColor back) {
         reColor(fore, back);
         return (*_convertPtr).c_str();
     }
@@ -251,7 +251,7 @@ public:
 
 private:
     StringPiece _data;
-    Color::ColorPiece *_pieces;
+    color::ColorPiece *_pieces;
     //char _data[SIZE];
     std::string *_convertPtr;
 
@@ -266,9 +266,9 @@ public:
     ColorStr() = default;
 
     // XXX:只适合单行
-    const std::string operator()(const char *buf, Color::ForeColor fore, Color::BackgroundColor back) {
+    const std::string operator()(const char *buf, color::ForeColor fore, color::BackgroundColor back) {
         using namespace std;
-        const pair<const char*, const char*> pieces = Color::portion(fore, back);
+        const pair<const char*, const char*> pieces = color::Portion(fore, back);
         return string(string(pieces.first) + buf + string(pieces.second));
     }
 
