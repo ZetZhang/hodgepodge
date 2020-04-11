@@ -149,11 +149,6 @@ struct piece {
     std::pair<const char*, const char *> _s;
 };
 
-const char* getpie() {
-    std::string spi("get test...");
-    return spi.c_str();
-}
-
 int main(int argc, const char *argv[])
 {
     const char *str[2] = { "A", "B" };
@@ -198,21 +193,5 @@ int main(int argc, const char *argv[])
     //std::cout << a.output << std::endl;
     A *a1 = new AAA();
     delete a1;
-
-    const char *pie = getpie();
-    std::cout << pie << std::endl;
-    {
-        pieces pc;
-        pie = pc._s.c_str();
-    }
-    std::cout << pie << std::endl;
-    {
-        piece pc;
-        std::string s1("s1");
-        std::string s2("s2");
-        pc.set(s1, s2);
-        pie = pc._s.first;
-    }
-    std::cout << pie << std::endl;
     return 0;
 }

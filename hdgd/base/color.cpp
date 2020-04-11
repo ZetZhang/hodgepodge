@@ -12,7 +12,9 @@
     printf("\n");               \
 } while (0)
 
-namespace hdgd::color
+namespace hdgd{
+
+namespace color
 {
 
 // XXX
@@ -145,6 +147,9 @@ ColorPiece::~ColorPiece() {
     }
     _tail = nullptr;
 }
+
+
+} // color
 
 } // namespace hdgd
 

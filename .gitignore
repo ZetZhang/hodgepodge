@@ -1,4 +1,5 @@
-# Prerequisites
+# Prerequisiteting done
+-- Build files have been written to: /home/ichheit/ich/hodgepodge/cmake-build-debugs
 *.d
 
 # Compiled Object files
@@ -46,3 +47,5 @@ CTestTestfile.cmake
 _deps
 
 tags
+.tags
+.ccls-cache
